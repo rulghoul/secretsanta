@@ -1,0 +1,8 @@
+# Ignorar todos los pyc
+*.pyc
+
+# Ignorar la carperta virtual
+virtual/
+
+# Ignorar cahe
+**/__pycache__/
