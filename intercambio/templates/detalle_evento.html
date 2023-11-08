@@ -1,0 +1,18 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Detalle del Evento</title>
+</head>
+<body>
+    <h1>Detalle del Evento</h1>
+    <h2>{{ evento.nombre }}</h2>
+    <p>Año: {{ evento.año }}</p>
+    <p>Activo: {% if evento.activo %} Sí {% else %} No {% endif %}</p>
+    <p>Sorteo Realizado: {% if evento.sorteo_realizado %} Sí {% else %} No {% endif %}</p>
+
+    <!-- Puedes agregar más detalles del evento aquí -->
+
+    <a href="{% url 'lista_eventos' %}">Volver a la lista de eventos</a>
+</body>
+</html>

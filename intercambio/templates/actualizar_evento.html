@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Actualizar Evento</title>
+</head>
+<body>
+    <h1>Actualizar Evento</h1>
+    
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit">Guardar Cambios</button>
+    </form>
+
+    <h2>Lista de Santas en este Evento</h2>
+    <ul>
+        {% for santa in santas %}
+            <li>{{ santa.usuario.username }}</li>
+        {% empty %}
+            <li>No hay Santas en este evento.</li>
+        {% endfor %}
+    </ul>
+
+    <h2>Acciones adicionales</h2>
+    {% if evento.sorteo_realizado %}
+        <!-- Mostrar mensaje de confirmación -->
+        <p>El sorteo ya se ha realizado. ¿Deseas realizar un nuevo sorteo?</p>
+        <a href="{% url 'realizar_nuevo_sorteo' evento.id %}" class="btn btn-warning">Realizar Nuevo Sorteo</a>
+    {% else %}
+        <a href="{% url 'agregar_santa' %}?evento={{ evento.id }}" class="btn btn-primary">Agregar Santa</a>
+        <a href="{% url 'importar_santas_csv'  evento.pk %}" class="btn btn-secondary">Importar Santas desde CSV</a>
+        <form method="post" action="{% url 'realizar_sorteo' evento.id %}">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-success">Realizar Sorteo</button>
+        </form>
+    {% endif %}
+
+    {% if mensaje %} 
+        {{ mensaje }}
+    {% endif %}
+</body>
+</html>

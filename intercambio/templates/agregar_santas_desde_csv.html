@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Agregar Santas desde CSV</title>
+</head>
+<body>
+    <h1>Agregar Santas desde CSV</h1>
+    <p>Evento: {{ evento.nombre }}</p>  <!-- Muestra el nombre del evento -->
+    
+    {% if error %}
+    <p style="color: red;">{{ error }}</p>
+    {% endif %}
+    
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        <input type="hidden" name="evento" value="{{ pk }}">
+        <input type="file" name="csv_file">
+        <button type="submit">Cargar CSV</button>
+    </form>
+    {% if mensaje %} 
+        {{ mensaje }}
+    {% endif %}
+    
+    <p><a href="{% url 'actualizar_evento' 1 %}">Volver al evento</a></p>
+</body>
+</html>

@@ -1,0 +1,15 @@
+<!-- secret_santa/templates/santa_form.html -->
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Agregar Santa</title>
+</head>
+<body>
+    <h2>Agregar Santa</h2>
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit">Agregar Santa</button>
+    </form>
+</body>
+</html>
