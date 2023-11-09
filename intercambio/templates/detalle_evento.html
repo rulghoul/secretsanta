@@ -2,21 +2,12 @@
 
 {% block content %}
 
-    <h2>{{ evento.nombre }}</h2>
-    <p>Año: {{ evento.anio }}</p>
-    <p>Activo: {% if evento.activo %} Sí {% else %} No {% endif %}</p>
+    <h2>{{ evento.nombre }} - {{ evento.anio }}</h2>
     <p>Sorteo Realizado: {% if evento.sorteo_realizado %} Sí {% else %} No {% endif %}</p>
 
     <!-- Puedes agregar más detalles del evento aquí -->
 
-    <h2>Lista de Santas en este Evento</h2>
-    <ul>
-        {% for santa in santas %}
-            <li>{{ santa.usuario.username }}</li>
-        {% empty %}
-            <li>No hay Santas en este evento.</li>
-        {% endfor %}
-    </ul>
+    <h2>Participantes</h2>
 
     <table class="table table-striped table-sm">
         <thead class="thead-dark">
@@ -29,15 +20,15 @@
     <tbody id="CuerpoCatalogo">
     {% for santa in santas  %}
     <tr>
+        <td>{{ santa.usuario.get_full_name }}</td>
         <td>{{ santa.usuario.username }}</td>
-        <td>{{ santa.usuario.first_name }} {{ santa.usuario.last_name }}</td>
         <td class="text-center">
         <!-- Read book buttons -->
-        <a type="button" class="read-book btn btn-sm btn-primary" href="{% url 'update_santa' santa.pk %}">
+        <a type="button" class="read-book btn btn-sm btn-primary" href="{% url 'detalle_santa' santa.pk evento.pk  %}">
             <span class="fa fa-eye"></span>
         </a>
         <!-- Update book buttons -->
-        <a type="button" class="update-book btn btn-sm btn-info" href="" >
+        <a type="button" class="update-book btn btn-sm btn-info" href="{% url 'update_santa' santa.pk evento.pk  %}" >
             <span class="fa fa-pen"></span>
         </a>
         <!-- Delete book buttons -->
@@ -47,7 +38,10 @@
         </td>
     </tr>
     {% endfor %}
+</tbody>
+</table>
 
 
-    <a href="{% url 'home' %}">Volver</a>
+    <a href="{% url 'home' %}" class="btn btn-danger">Volver</a>
+
 {% endblock %}

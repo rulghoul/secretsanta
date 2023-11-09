@@ -32,7 +32,8 @@ urlpatterns = [
     path('', views.inicio, name='home'),
     path("admin/", admin.site.urls),
     path('agregar_santa/', views.SantaCreateView.as_view(), name='agregar_santa'),
-    path('update_santa/<int:pk>/', views.SantaUpdateView.as_view(), name='update_santa'),
+    path('update_santa/<int:id_santa>/evento/<int:id_evento>', views.SantaUpdateView, name='update_santa'),
+    path('santa/<int:id_santa>/evento/<int:id_evento>/', views.detalle_santa, name='detalle_santa'),
     
     path('eventos/agregar_csv/<int:pk>/', views.agregar_santas_desde_csv, name='importar_santas_csv'),
     path('mis_eventos/', views.mis_eventos, name='mis_eventos'),

@@ -9,7 +9,7 @@ from django.contrib.auth.views import LoginView
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 
-from .models import Santa, Evento
+from .models import Santa, Evento, Opcion
 from .forms import SantaForm, EventoForm, OpcionInlineFormSet
 
 import csv
@@ -210,31 +210,23 @@ def mis_eventos(request):
 
 ######################## Santas
 
-class SantaUpdateView(UpdateView):
-    model = Santa
-    fields = ['usuario', 'destinatario', 'excepcion', 'organizador']  # o simplemente 'fields = '__all__' si deseas editar todos
-    template_name = 'santas/update_santa.html'
-    success_url = reverse_lazy('nombre_de_la_url_lista_santas')  # Reemplaza con el nombre de tu URL
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        if self.request.POST:
-            context['formset'] = OpcionInlineFormSet(self.request.POST, self.request.FILES, instance=self.object)
-        else:
-            context['formset'] = OpcionInlineFormSet(instance=self.object)
-        return context
-
-    def form_valid(self, form):
-        context = self.get_context_data()
-        formset = context['formset']
+def SantaUpdateView(request, id_santa, id_evento):
+    santa = get_object_or_404(Santa, pk=id_santa)
+    evento = get_object_or_404(Evento, pk=id_evento)
+    formset = OpcionInlineFormSet(instance=santa, queryset=Opcion.objects.filter(evento=evento))
+    
+    if request.method == 'POST':
+        formset = OpcionInlineFormSet(request.POST, request.FILES, instance=santa)
         if formset.is_valid():
-            self.object = form.save()
-            formset.instance = self.object
             formset.save()
-            return super().form_valid(form)
-        else:
-            return self.render_to_response(self.get_context_data(form=form))
+            return redirect('detalle_evento', pk=evento.pk)
+    if request.user == santa.usuario:
+        return render(request, 'santas/detail_santa.html', {'santa': santa, 'opciones': opciones, 'evento': evento})
+    else:
+        return render(request, 'santas/update_santa.html', {'formset': formset, 'santa': santa, 'evento': evento})
 
-    def get_success_url(self):
-        # Aquí puedes definir la URL de éxito después de actualizar el Santa
-        return reverse_lazy('home', kwargs={'pk': self.object.pk})
+def detalle_santa(request, id_santa, id_evento):
+    santa = get_object_or_404(Santa, pk=id_santa)
+    evento = get_object_or_404(Evento, pk=id_evento)
+    opciones = Opcion.objects.filter(santa=santa, evento=evento)
+    return render(request, 'santas/detail_santa.html', {'santa': santa, 'opciones': opciones, 'evento': evento})

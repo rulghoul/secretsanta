@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h2>{{ santa.usuario.get_full_name }} quiere<br>para {{evento.nombre}} {{ evento.anio}}:</h2>
+
+<a href="{% url 'detalle_evento' evento.pk %}" class="btn btn-danger">Volver</a>
+<table class="table table-striped table-sm">
+    <thead class="thead-dark">
+    <tr>
+        <th>Nombre</th>
+        <th>Link</th>
+        <th>Imagen</th>
+    </tr>
+</thead>
+<tbody id="Opciones">
+  {% for opcion in opciones %}
+  <tr>
+    <td>{{ opcion.nombre_regalo }}</td>
+    <td><a href="{{ opcion.link }}" target="_blank">Ver Producto</a></td>
+    <td>
+        {% if opcion.imagen %}
+          <img src="{{ opcion.imagen.url }}" alt="{{ opcion.nombre_regalo }}">
+        {% else %}
+          No hay imagen disponible.
+        {% endif %}</td>
+  </tr>
+  {% empty %}
+    <p>No hay opciones de regalo registradas para el evento seleccionado.</p>
+  {% endfor %}
+</tbody>
+</table>
+
+{% endblock %}
