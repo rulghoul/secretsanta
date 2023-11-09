@@ -1,17 +1,30 @@
+from django.contrib.auth import logout
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from django.core.mail import send_mail
 from django.urls import reverse_lazy
 from django.views.generic import ListView, CreateView, UpdateView, DeleteView, DetailView
 from django.contrib.auth.models import User 
+from django.contrib.auth.views import LoginView
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth.mixins import LoginRequiredMixin
+
 from .models import Santa, Evento
-from .forms import SantaForm, EventoForm
+from .forms import SantaForm, EventoForm, OpcionInlineFormSet
 
 import csv
 import random
 import logging
 
-class SantaCreateView(CreateView):
+class CustomLoginView(LoginView):
+    template_name = 'auth/login.html'
+
+    def form_valid(self, form):
+        super().form_valid(form)
+        return redirect('home')
+
+
+class SantaCreateView(LoginRequiredMixin, CreateView):
     model = Santa
     form_class = SantaForm
     template_name = 'santa_form.html'
@@ -81,6 +94,8 @@ def crea_santas_from_csv(evento, csv_file):
     except:
         return {"respuesta": False, "mensaje": "No se pudo leer el archivo"}
 
+
+@login_required
 def agregar_santas_desde_csv(request, pk):
     evento = get_object_or_404(Evento, pk=pk)    
 
@@ -98,18 +113,18 @@ def agregar_santas_desde_csv(request, pk):
     return render(request, 'agregar_santas_desde_csv.html', {"evento": evento})
 
 
-class EventoListView(ListView):
+class EventoListView(LoginRequiredMixin, ListView):
     model = Evento
     template_name = 'lista_eventos.html'
     context_object_name = 'eventos'
 
-class EventoCreateView(CreateView):
+class EventoCreateView(LoginRequiredMixin, CreateView):
     model = Evento
     form_class = EventoForm
     template_name = 'agregar_evento.html'
     success_url = reverse_lazy('eventos')
 
-class EventoUpdateView(UpdateView):
+class EventoUpdateView(LoginRequiredMixin, UpdateView):
     model = Evento
     form_class = EventoForm
     template_name = 'actualizar_evento.html'
@@ -118,21 +133,31 @@ class EventoUpdateView(UpdateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         evento = self.get_object()
+        eventos_activos = Evento.objects.filter(santa__usuario=self.request.user, activo=True)
         context['santas'] = evento.santa_set.all()
+        context['eventos_activos'] = eventos_activos
         return context
 
-class EventoDeleteView(DeleteView):
+class EventoDeleteView(LoginRequiredMixin, DeleteView):
     model = Evento
     template_name = 'borrar_evento.html'
     success_url = reverse_lazy('eventos')
 
-class EventoDetailView(DetailView):
+
+class EventoDetailView(LoginRequiredMixin, DetailView):
     model = Evento
     template_name = 'detalle_evento.html'
     context_object_name = 'evento'
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        evento = self.get_object()
+        context['santas'] = evento.santa_set.all()
+        return context
+
 #### Sorteo
 
+@login_required
 def realizar_sorteo(request, evento_id):
     evento = get_object_or_404(Evento, pk=evento_id)
     santas = Santa.objects.filter(eventos=evento)
@@ -145,6 +170,7 @@ def realizar_sorteo(request, evento_id):
 
     return redirect('detalle_evento', evento_id=evento_id)  # Redirige al detalle del evento
 
+@login_required
 def realizar_nuevo_sorteo(request, evento_id):
     evento = get_object_or_404(Evento, pk=evento_id)
 
@@ -161,3 +187,54 @@ def realizar_nuevo_sorteo(request, evento_id):
         evento.save()
 
     return redirect('detalle_evento', evento_id=evento_id)  # Redirige al detalle del evento
+
+@login_required
+def cerrar_sesion(request):
+    logout(request)
+    return redirect('home')
+
+
+def inicio(request):
+    if request.user.is_authenticated:
+        eventos_activos = Evento.objects.filter(santa__usuario=request.user, activo=True)
+        return render(request, 'auth/home.html', {'eventos_activos': eventos_activos})
+    else:
+        return render(request, 'auth/home.html')
+
+@login_required
+def mis_eventos(request):
+    usuario_actual = request.user
+    eventos_activos = Evento.objects.filter( activo=True)
+    return render(request, 'mis_eventos.html', {'eventos_activos': eventos_activos})
+
+
+######################## Santas
+
+class SantaUpdateView(UpdateView):
+    model = Santa
+    fields = ['usuario', 'destinatario', 'excepcion', 'organizador']  # o simplemente 'fields = '__all__' si deseas editar todos
+    template_name = 'santas/update_santa.html'
+    success_url = reverse_lazy('nombre_de_la_url_lista_santas')  # Reemplaza con el nombre de tu URL
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        if self.request.POST:
+            context['formset'] = OpcionInlineFormSet(self.request.POST, self.request.FILES, instance=self.object)
+        else:
+            context['formset'] = OpcionInlineFormSet(instance=self.object)
+        return context
+
+    def form_valid(self, form):
+        context = self.get_context_data()
+        formset = context['formset']
+        if formset.is_valid():
+            self.object = form.save()
+            formset.instance = self.object
+            formset.save()
+            return super().form_valid(form)
+        else:
+            return self.render_to_response(self.get_context_data(form=form))
+
+    def get_success_url(self):
+        # Aquí puedes definir la URL de éxito después de actualizar el Santa
+        return reverse_lazy('home', kwargs={'pk': self.object.pk})

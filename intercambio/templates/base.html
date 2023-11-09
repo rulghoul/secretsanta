@@ -1,0 +1,108 @@
+<!-- templates/base.html -->
+{% load static %}
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>{% block title %}Intercambio{% endblock %}</title>
+    {# Load the tag library #}
+    {% load bootstrap4 %}
+    
+    {# Load CSS and JavaScript #}
+    {% bootstrap_css %}
+    {% bootstrap_javascript jquery='full' %}
+    {# Display django.contrib.messages as Bootstrap alerts #}
+    {% bootstrap_messages %}
+    <link rel="shortcut icon" type="image/png" href="{% static 'favicon.ico' %}"/>
+    <script src="{% static 'fontawesome_free/js/all.min.js' %}"></script>    
+  </head>
+  <body>
+    <style>
+        body {
+            background-image: url("{% static 'img/fondo.jpg' %}");
+            background-repeat: repeat;
+        }
+      .select{
+        border-radius: 3rem;
+        }
+      .textinput   {
+        border-radius: 3rem;
+        }
+    .passwordinput {
+        border-radius: 3rem;
+    }
+      .input   {
+        border-radius: 3rem;
+        }
+        .sidenav {
+            height: 100%;
+            width: 160px;
+            position: fixed;
+            z-index: 1;
+            top: 0;
+            left: 0;
+            background-color: #F77;
+            overflow-x: hidden; 
+            padding-top: 20px;
+        }
+        
+        .sidenav a {
+            padding: 6px 8px 6px 16px;
+            text-decoration: none;
+            font-size: 25px;
+            color: #FFF;
+            display: block;
+        }
+        
+        .sidenav a:hover {
+            color: #f1f1f1;
+        }
+        
+        /* Estilos para el enlace que se quedará abajo */
+        .sidenav .enlace-inferior {
+            position: absolute; /* Posicionamiento absoluto respecto a su contenedor relativo más cercano, en este caso '.sidenav' */
+            bottom: 0; 
+            width: 100%;
+            color: #FFF;
+        }
+        
+        .main {
+            margin-left: 160px;
+            padding: 15px 10px;
+        }
+
+        .enlace-fijo {
+            position: fixed; /* Fija el elemento en la posición indicada */
+            bottom: 0; /* Alinea el elemento en la parte inferior de la ventana del navegador */
+            width: 100%; /* Opcional: Si quieres que el contenedor tenga el ancho completo de la ventana */
+            text-align: right; /* Opcional: Para centrar el enlace dentro del contenedor */
+            
+            padding: 10px 0; /* Opcional: Añade algo de relleno en la parte superior e inferior */
+          }
+    </style>
+
+    <div class="sidenav">
+        <a href="{% url 'home' %}">Inicio</a>
+        {% if user.is_authenticated %}
+            {% include "mis_eventos.html" %}
+            <a href="{% url 'cerrar_sesion' %}" class="enlace-inferior btn btn-danger">Salir</a>
+        {% else %}
+            <a href="{% url 'login' %}" class="enlace-inferior btn btn-primary">Ingresar</a>
+        {% endif %}
+    </div>
+
+
+	<div id="content" name="content" class="main" >
+		<div class="row justify-content-center">
+			<div class="col-10" style="background-color:rgba(240, 240, 240, 0.9); padding-top: 15px:">				
+				<hr class="mt-0 mb-4">
+				{% block content %}
+				{% endblock %}
+                
+			</div>
+		</div>
+	</div>
+
+    <div class="enlace-fijo">
+        <a href="https://www.freepik.com/free-vector/merry-christmas-happy-new-year-seamless-pattern-with-icons_3330423.htm#query=christmas%20wallpaper&position=1&from_view=keyword&track=ais">Image by vextok</a> on Freepik
+    </div>

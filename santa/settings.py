@@ -26,7 +26,13 @@ SECRET_KEY = "django-insecure-yf_)2^ej#*m1^(f3r(n&w-$9it6egzicn^-2spru54$8t@dy5c
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+
+
+ALLOWED_HOSTS = ['*']
+
+import sys
+
+sys.modules['fontawesome_free'] = __import__('fontawesome-free')
 
 
 # Application definition
@@ -39,6 +45,10 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    'bootstrap4',
+    'crispy_forms', 
+    'crispy_bootstrap4', 
+    'fontawesome_free',
 ]
 
 MIDDLEWARE = [
@@ -52,6 +62,8 @@ MIDDLEWARE = [
 ]
 
 ROOT_URLCONF = "santa.urls"
+LOGIN_URL = 'login'
+LOGOUT_REDIRECT_URL = 'home'
 
 TEMPLATES = [
     {
@@ -68,6 +80,10 @@ TEMPLATES = [
         },
     },
 ]
+
+CRISPY_ALLOWED_TEMPLATE_PACKS = "bootstrap4"
+
+CRISPY_TEMPLATE_PACK = "bootstrap4"
 
 WSGI_APPLICATION = "santa.wsgi.application"
 
@@ -117,7 +133,19 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.2/howto/static-files/
 
-STATIC_URL = "static/"
+#STATIC_URL = "static/"
+
+PROJECT_ROOT = os.path.dirname(os.path.abspath(__file__))
+STATIC_URL = "/static/"
+#STATIC_ROOT = os.path.join(PROJECT_ROOT, 'static') 
+STATICFILES_DIRS = [
+    os.path.join(PROJECT_ROOT, 'static'),
+    BASE_DIR / 'static',
+    # BASE_DIR / 'Exam' / 'static',
+]
+
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(PROJECT_ROOT, "media")
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field

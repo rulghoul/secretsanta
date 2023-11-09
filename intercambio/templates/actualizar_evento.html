@@ -1,15 +1,13 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Actualizar Evento</title>
-</head>
-<body>
-    <h1>Actualizar Evento</h1>
+{% extends "base.html" %}
+{% load crispy_forms_tags %} 
+
+{% block content %}
     
+    <h2>{{  evento.nombre }}</h2>
     <form method="post">
-        {% csrf_token %}
-        {{ form.as_p }}
-        <button type="submit">Guardar Cambios</button>
+        {% csrf_token %}        
+        {{ form|crispy }}
+        <button type="submit" class="btn btn-primary">Guardar Cambios</button>
     </form>
 
     <h2>Lista de Santas en este Evento</h2>
@@ -38,5 +36,4 @@
     {% if mensaje %} 
         {{ mensaje }}
     {% endif %}
-</body>
-</html>
+{% endblock %}

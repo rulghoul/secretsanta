@@ -1,11 +1,9 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Agregar Santas desde CSV</title>
-</head>
-<body>
-    <h1>Agregar Santas desde CSV</h1>
-    <p>Evento: {{ evento.nombre }}</p>  <!-- Muestra el nombre del evento -->
+{% extends "base.html" %}
+{% load crispy_forms_tags %} 
+
+{% block content %}
+
+    <h2>Agregar Santas desde CSV para<br>{{ evento.nombre }} </h2>
     
     {% if error %}
     <p style="color: red;">{{ error }}</p>
@@ -15,12 +13,11 @@
         {% csrf_token %}
         <input type="hidden" name="evento" value="{{ pk }}">
         <input type="file" name="csv_file">
-        <button type="submit">Cargar CSV</button>
+        <button type="submit" class="btn btn-primary">Cargar CSV</button>
     </form>
     {% if mensaje %} 
         {{ mensaje }}
     {% endif %}
     
     <p><a href="{% url 'actualizar_evento' 1 %}">Volver al evento</a></p>
-</body>
-</html>
+{% endblock %}

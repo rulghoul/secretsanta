@@ -14,7 +14,7 @@ class Evento(models.Model):
         return self.nombre
 
 class Santa(models.Model):
-    usuario = models.OneToOneField(User, on_delete=models.CASCADE)
+    usuario = models.ForeignKey(User, on_delete=models.CASCADE)
     eventos = models.ManyToManyField(Evento, through='Opcion')
     destinatario = models.ForeignKey('self', on_delete=models.SET_NULL, null=True, blank=True, related_name='santa_destinatario')
     excepcion = models.ForeignKey('self', on_delete=models.SET_NULL, null=True, blank=True, related_name='santa_excepcion_obsequio')

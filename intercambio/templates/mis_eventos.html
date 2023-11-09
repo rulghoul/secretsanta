@@ -1,0 +1,4 @@
+<!-- templates/mis_eventos.html -->
+{% for evento in eventos_activos %}
+    <a href="{% url 'detalle_evento' evento.pk %}">{{ evento.nombre }}</a>
+{% endfor %}

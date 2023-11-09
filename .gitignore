@@ -6,3 +6,6 @@ virtual/
 
 # Ignorar cahe
 **/__pycache__/
+
+#ignorar static
+static/

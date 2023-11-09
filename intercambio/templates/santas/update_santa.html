@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% load crispy_forms_tags %} 
+
+{% block content %}
+  <h2>Editando opciones para {{ object.usuario.get_full_name }}</h2>
+  <form method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+
+    {{ form|crispy }}
+    {{ formset.management_form }}
+    {% for form in formset %}
+      <div class="formset-form">
+        {{ form.id }}
+        {{ form.nombre_regalo }}
+        {{ form.link }}
+        {{ form.imagen }}
+        {% if form.DELETE %}
+          <label for="{{ form.DELETE.id_for_label }}">Eliminar</label>
+          {{ form.DELETE }}
+        {% endif %}
+      </div>
+    {% endfor %}
+    <button type="submit">Guardar cambios</button>
+  </form>
+{% endblock %}

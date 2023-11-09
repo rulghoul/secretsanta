@@ -17,12 +17,25 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path
 from intercambio import views
+from django.contrib.auth import views as auth_views
+from django.conf.urls.static import static
+from django.conf import settings
 
 urlpatterns = [
+    path("login/", views.CustomLoginView.as_view(), name='login'),
+    path('password_reset/', auth_views.PasswordResetView.as_view( template_name='auth/password_reset_form.html'), name='password_reset'),
+    path('password_reset/done/', auth_views.PasswordResetDoneView.as_view(template_name='auth/password_reset_done.html'), name='password_reset_done'),
+    path('reset/<uidb64>/<token>/', auth_views.PasswordResetConfirmView.as_view(), name='password_reset_confirm'),
+    path('reset/done/', auth_views.PasswordResetCompleteView.as_view(), name='password_reset_complete'),
+    path('logout/', views.cerrar_sesion, name='cerrar_sesion'),
+
+    path('', views.inicio, name='home'),
     path("admin/", admin.site.urls),
     path('agregar_santa/', views.SantaCreateView.as_view(), name='agregar_santa'),
+    path('update_santa/<int:pk>/', views.SantaUpdateView.as_view(), name='update_santa'),
     
     path('eventos/agregar_csv/<int:pk>/', views.agregar_santas_desde_csv, name='importar_santas_csv'),
+    path('mis_eventos/', views.mis_eventos, name='mis_eventos'),
 
     path('eventos/', views.EventoListView.as_view(), name='eventos'),
     path('eventos/agregar/', views.EventoCreateView.as_view(), name='agregar_evento'),
@@ -33,3 +46,9 @@ urlpatterns = [
     path('eventos/realizar_sorteo/<int:evento_id>/', views.realizar_sorteo, name='realizar_sorteo'),
     path('eventos/realizar_nuevo_sorteo/<int:evento_id>/', views.realizar_nuevo_sorteo, name='realizar_nuevo_sorteo'),
 ]
+
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL,
+                          document_root=settings.MEDIA_ROOT)
+    urlpatterns += static(settings.STATIC_URL,
+                          document_root=settings.STATIC_ROOT)

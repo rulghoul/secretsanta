@@ -1,10 +1,6 @@
-<!-- lista_eventos.html -->
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Lista de Eventos</title>
-</head>
-<body>
+{% extends "base.html" %}
+
+{% block content %}
     <h1>Lista de Eventos</h1>
     <ul>
         {% for evento in eventos %}
@@ -18,5 +14,5 @@
         {% endfor %}
     </ul>
     <a href="{% url 'agregar_evento' %}">Agregar Evento</a>
-</body>
-</html>
+
+{% endblock %}
