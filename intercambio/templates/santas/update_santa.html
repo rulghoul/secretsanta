@@ -11,7 +11,7 @@
     {{ formset.management_form }}
     {% crispy formset helper %}
     {{ formset.non_form_errors }}
-    <button type="submit" style="btn btn-primary">Guardar cambios</button>
+    <button type="submit" class="btn btn-primary">Guardar cambios</button>
   </form>
 
   <a href="{% url 'detalle_evento' evento.pk %}" class="btn btn-danger">Volver</a>

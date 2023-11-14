@@ -248,19 +248,21 @@ def mis_eventos(request):
 def SantaUpdateView(request, id_santa, id_evento):
     santa = get_object_or_404(Santa, pk=id_santa)
     evento = get_object_or_404(Evento, pk=id_evento)
-    opciones = Opcion.objects.filter(santa=santa)
+    participacion = get_object_or_404(Participacion, santa=santa, evento= evento)
+    opciones = Opcion.objects.filter(paricipacion=participacion)
 
     # Check if the logged-in user is allowed to edit this Santa
     if request.user != santa.usuario:
         return render(request, 'santas/detail_santa.html', {'santa': santa, 'opciones': opciones, 'evento': evento})
 
     # Initialize the formset
-    formset = OpcionInlineFormSet(instance=santa)
+    formset = OpcionInlineFormSet(instance=participacion)
     helper = OpcionFormsetHelper()
 
     if request.method == 'POST':
-        formset = OpcionInlineFormSet(request.POST, request.FILES, instance=santa, queryset=Opcion.objects.filter(evento=evento))
+        formset = OpcionInlineFormSet(request.POST, request.FILES, instance=participacion, queryset=Opcion.objects.filter(paricipacion=participacion))
         if formset.is_valid():
+            instancias_opcion = formset.save(commit=False)
             formset.save()
             messages.success(request, "The options have been updated successfully.")
             return redirect('detalle_evento', pk=evento.pk)
@@ -280,5 +282,6 @@ def SantaUpdateView(request, id_santa, id_evento):
 def detalle_santa(request, id_santa, id_evento):
     santa = get_object_or_404(Santa, pk=id_santa)
     evento = get_object_or_404(Evento, pk=id_evento)
-    opciones = Opcion.objects.filter(santa=santa)
+    participacion = get_object_or_404(Participacion, santa=santa, evento= evento)
+    opciones = Opcion.objects.filter(paricipacion=participacion)
     return render(request, 'santas/detail_santa.html', {'santa': santa, 'opciones': opciones, 'evento': evento})

@@ -1,6 +1,6 @@
 from django import forms
 from django.forms import inlineformset_factory
-from .models import Santa, Evento, Opcion
+from .models import Santa, Evento, Opcion, Participacion
 
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, Div, Field, Fieldset, Submit
@@ -29,7 +29,7 @@ class OpcionFormsetHelper(FormHelper):
 # Inline formset para las opciones de un Santa
 
 OpcionInlineFormSet = inlineformset_factory(
-    Santa, Opcion, form=OpcionForm,
+    Participacion, Opcion, form=OpcionForm,
     extra=2,can_delete=True 
 )
 

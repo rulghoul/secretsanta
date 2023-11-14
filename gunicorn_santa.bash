@@ -1,13 +1,13 @@
 #!/bin/bash
 
 NAME="fiestas"                                  # Name of the application
-DJANGODIR=/var/www/python/Fiesta/fiestas             # Django project directory
-SOCKFILE=/var/www/python/Fiesta/run/gunicorn.sock  # we will communicte using this unix socket
-USER=eventos                                        # the user to run as
+DJANGODIR=/var/www/python/santa             # Django project directory
+SOCKFILE=/var/www/python/santa/run/gunicorn.sock  # we will communicte using this unix socket
+USER=santa                                        # the user to run as
 GROUP=webapps                                     # the group to run as
 NUM_WORKERS=4                                     # how many worker processes should Gunicorn spawn
-DJANGO_SETTINGS_MODULE=fiestas.settings             # which settings file should Django use
-DJANGO_WSGI_MODULE=fiestas.wsgi                     # WSGI module name
+DJANGO_SETTINGS_MODULE=santa.settings             # which settings file should Django use
+DJANGO_WSGI_MODULE=santa.wsgi                     # WSGI module name
 
 echo "Starting $NAME as `whoami`"
 

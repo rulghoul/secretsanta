@@ -19,7 +19,7 @@
     <td><a href="{{ opcion.link }}" target="_blank">Ver Producto</a></td>
     <td>
         {% if opcion.imagen %}
-          <img src="{{ opcion.imagen.url }}" alt="{{ opcion.nombre_regalo }}">
+          <img src="{{ opcion.imagen.url }}" alt="{{ opcion.nombre_regalo }} " width="300">
         {% else %}
           No hay imagen disponible.
         {% endif %}</td>

@@ -9,3 +9,6 @@ virtual/
 
 #ignorar static
 static/
+
+#ignorar imagenes cargadas
+**/opciones_regalos/

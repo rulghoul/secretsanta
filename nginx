@@ -1,22 +1,22 @@
-upstream eventos_server {
-  server unix:/var/www/python/Fiesta/run/gunicorn.sock fail_timeout=0;
+upstream santa_server {
+  server unix:/var/www/python/santa/run/gunicorn.sock fail_timeout=0;
 }
 
 server {
     listen   80;
-    server_name eventos.organiza-me.com;
+    server_name intercambio.ghoulrul.online;
 
     client_max_body_size 4G;
 
-    access_log /var/www/python/Fiesta/logs/nginx-access.log;
-    error_log /var/www/python/Fiesta/logs/nginx-error.log;
+    access_log /var/www/python/santa/logs/nginx-access.log;
+    error_log /var/www/python/santa/logs/nginx-error.log;
 
     location /static {
-        alias   /var/www/python/Fiesta/fiestas/fiestas/static/;
+        alias   /var/www/python/santa/fiestas/fiestas/static/;
     }
 
     location /media {
-        alias   /var/www/python/Fiesta/fiestas/fiestas/media/;
+        alias   /var/www/python/santa/fiestas/fiestas/media/;
     }
 
     location / {
@@ -24,7 +24,7 @@ server {
         proxy_set_header Host $http_host;
         proxy_redirect off;
         if (!-f $request_filename) {
-            proxy_pass http://eventos_server;
+            proxy_pass http://santa_server;
             break;
         }
     }

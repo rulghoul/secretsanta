@@ -4,7 +4,7 @@
 
     <h2>{{ evento.nombre }} - {{ evento.anio }}</h2>
     {% if evento.sorteo_realizado %}<h3 style="color:red;"> Sorteo Realizado {% else %}<h3 style="color:green;"> Esperando Sorteo  {% endif %}</h3>
-    {% if evento.sorteo_realizado %} <h4 style="color:red;">Destinatario:  {{ santa.destinatario }}</h4>{% endif %}
+    {% if evento.sorteo_realizado %} <h4 style="color:red;">Destinatario:  {{ santa.destinatario.usuario.get_full_name }}</h4>{% endif %}
 
     <!-- Puedes agregar más detalles del evento aquí -->
 
@@ -25,16 +25,8 @@
         <td>{{ santa.usuario.username }}</td>
         <td class="text-center">
         <!-- Read book buttons -->
-        <a type="button" class="read-book btn btn-sm btn-primary" href="{% url 'detalle_santa' santa.pk evento.pk  %}">
+        <a type="button" class="read-book btn btn-sm btn-primary" href="{% url 'update_santa' santa.pk evento.pk  %}">
             <span class="fa fa-eye"></span>
-        </a>
-        <!-- Update book buttons -->
-        <a type="button" class="update-book btn btn-sm btn-info" href="{% url 'update_santa' santa.pk evento.pk  %}" >
-            <span class="fa fa-pen"></span>
-        </a>
-        <!-- Delete book buttons -->
-        <a type="button" class="delete-book btn btn-sm btn-danger" href="">
-            <span class="fa fa-trash"></span>
         </a>
         </td>
     </tr>

@@ -21,16 +21,6 @@ class Santa(models.Model):
 
     def __str__(self):
         return f"{self.usuario.first_name} {self.usuario.last_name}"
-
-class Opcion(models.Model):
-    santa = models.ForeignKey(Santa, on_delete=models.CASCADE)
-    evento = models.ForeignKey(Evento, on_delete=models.CASCADE)
-    nombre_regalo = models.CharField(max_length=255)
-    link = models.URLField()
-    imagen = models.ImageField(upload_to='opciones_regalos/')
-
-    def __str__(self):
-        return self.nombre_regalo
     
 class Participacion(models.Model):
     santa = models.ForeignKey(Santa, on_delete=models.CASCADE)
@@ -41,3 +31,12 @@ class Participacion(models.Model):
 
     def __str__(self):
         return f"{self.santa} en {self.evento}"
+    
+class Opcion(models.Model):
+    paricipacion = models.ForeignKey(Participacion, on_delete=models.CASCADE)
+    nombre_regalo = models.CharField(max_length=255)
+    link = models.URLField()
+    imagen = models.ImageField(upload_to='opciones_regalos/')
+
+    def __str__(self):
+        return self.nombre_regalo
