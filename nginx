@@ -1,22 +1,28 @@
-upstream santa_server {
-  server unix:/var/www/python/secretsanta/run/gunicorn.sock fail_timeout=0;
+upstream acupuntura_server {
+  server unix:/var/www/python/acupuntura/run/gunicorn.sock fail_timeout=0;
 }
 
 server {
-    listen   80;
-    server_name intercambio.ghoulrul.online;
+    listen 80;
+    listen [::]:80;
+    listen 443 ssl;
+    server_name intercambio.organiza-me.com;
+
+    #SSL/TLS
+    ssl_certificate /etc/letsencrypt/live/ghoulrul.online/fullchain.pem; # managed by Certbot
+    ssl_certificate_key /etc/letsencrypt/live/ghoulrul.online/privkey.pem; # managed by Certbot
 
     client_max_body_size 4G;
 
-    access_log /var/www/python/santa/logs/nginx-access.log;
-    error_log /var/www/python/santa/logs/nginx-error.log;
+    access_log /var/www/python/secretsanta/logs/nginx-access.log;
+    error_log /var/www/python/secretsanta/logs/nginx-error.log;
 
     location /static {
         alias   /var/www/python/secretsanta/santa/static/;
     }
 
     location /media {
-        alias   /var/www/python/secretsanta/santa/media/;
+        alias   /var/www/python/acupuntura/secretsanta/santa/media/;
     }
 
     location / {
@@ -29,4 +35,3 @@ server {
         }
     }
 }
-

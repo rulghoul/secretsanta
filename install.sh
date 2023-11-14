@@ -29,7 +29,7 @@ supervisorctl reread
 supervisorctl update
 supervisorctl status
 
-echo "Se termino de crear elservicio Intercambio"
+echo "Se termino de crear el servicio Intercambio"
 
 echo "Se copia la configuracion de Intercambio"
 #Configuracion de Nginx

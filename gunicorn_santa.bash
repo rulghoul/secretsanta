@@ -1,7 +1,7 @@
 #!/bin/bash
 
-NAME="fiestas"                                  # Name of the application
-DJANGODIR=/var/www/python/secretsanta             # Django project directory
+NAME="santa"                                  # Name of the application
+DJANGODIR=/var/www/python/secretsanta/santa          # Django project directory
 SOCKFILE=/var/www/python/secretsanta/run/gunicorn.sock  # we will communicte using this unix socket
 USER=santa                                        # the user to run as
 GROUP=webapps                                     # the group to run as
