@@ -3,7 +3,8 @@
 {% block content %}
 
     <h2>{{ evento.nombre }} - {{ evento.anio }}</h2>
-    <p>Sorteo Realizado: {% if evento.sorteo_realizado %} Sí {% else %} No {% endif %}</p>
+    {% if evento.sorteo_realizado %}<h3 style="color:red;"> Sorteo Realizado {% else %}<h3 style="color:green;"> Esperando Sorteo  {% endif %}</h3>
+    {% if evento.sorteo_realizado %} <h4 style="color:red;">Destinatario:  {{ santa.destinatario }}</h4>{% endif %}
 
     <!-- Puedes agregar más detalles del evento aquí -->
 

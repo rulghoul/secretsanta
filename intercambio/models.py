@@ -14,8 +14,7 @@ class Evento(models.Model):
         return self.nombre
 
 class Santa(models.Model):
-    usuario = models.ForeignKey(User, on_delete=models.CASCADE)
-    eventos = models.ManyToManyField(Evento, through='Opcion')
+    usuario = models.OneToOneField(User, on_delete=models.CASCADE)
     destinatario = models.ForeignKey('self', on_delete=models.SET_NULL, null=True, blank=True, related_name='santa_destinatario')
     excepcion = models.ForeignKey('self', on_delete=models.SET_NULL, null=True, blank=True, related_name='santa_excepcion_obsequio')
     organizador = models.BooleanField(default=False)
@@ -32,3 +31,13 @@ class Opcion(models.Model):
 
     def __str__(self):
         return self.nombre_regalo
+    
+class Participacion(models.Model):
+    santa = models.ForeignKey(Santa, on_delete=models.CASCADE)
+    evento = models.ForeignKey(Evento, on_delete=models.CASCADE)
+
+    class Meta:
+        unique_together = ('santa', 'evento')  # Esto garantiza que un Santa solo pueda estar una vez en cada evento
+
+    def __str__(self):
+        return f"{self.santa} en {self.evento}"

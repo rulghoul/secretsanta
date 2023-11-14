@@ -3,17 +3,15 @@
 
 {% block content %}
   <h2>Editando opciones para {{ santa.usuario.get_full_name }}</h2>
+
+  <a href="{% url 'detalle_evento' evento.pk %}" class="btn btn-danger">Volver</a>
   <form method="post" enctype="multipart/form-data">
     {% csrf_token %}
 
     {{ formset.management_form }}
-    {% for form in formset %}
-      <div class="formset-form">
-
-        {{ form|crispy }}
-      </div>
-    {% endfor %}
-    <button type="submit">Guardar cambios</button>
+    {% crispy formset helper %}
+    {{ formset.non_form_errors }}
+    <button type="submit" style="btn btn-primary">Guardar cambios</button>
   </form>
 
   <a href="{% url 'detalle_evento' evento.pk %}" class="btn btn-danger">Volver</a>

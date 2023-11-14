@@ -9,4 +9,5 @@
         {{ form|crispy }}
         <button type="submit" class="btn btn-primary" >Agregar Santa</button>
     </form>
+    <p><a href="{% url 'actualizar_evento' 1 %}" class="btn btn-danger">Volver al evento</a></p>
 {% endblock %}

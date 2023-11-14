@@ -19,5 +19,5 @@
         {{ mensaje }}
     {% endif %}
     
-    <p><a href="{% url 'actualizar_evento' 1 %}">Volver al evento</a></p>
+    <p><a href="{% url 'actualizar_evento' evento.pk %}" class="btn btn-danger">Volver al evento</a></p>
 {% endblock %}

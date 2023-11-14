@@ -9,8 +9,8 @@ from django.contrib.auth.views import LoginView
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 
-from .models import Santa, Evento, Opcion
-from .forms import SantaForm, EventoForm, OpcionInlineFormSet
+from .models import Santa, Evento, Opcion, Participacion
+from .forms import SantaForm, EventoForm, OpcionInlineFormSet, OpcionFormsetHelper
 
 import csv
 import random
@@ -30,6 +30,21 @@ class SantaCreateView(LoginRequiredMixin, CreateView):
     template_name = 'santa_form.html'
     success_url = reverse_lazy('ruta_a_la_pagina_de_evento') 
 
+    def form_valid(self, form):
+        # Primero, guardamos el objeto Santa
+        self.object = form.save(commit=False)
+        self.object.usuario = self.request.user  # Asumiendo que el usuario logueado es el usuario de Santa
+        self.object.save()
+
+        # Supongamos que obtienes el ID del evento de alguna manera (p.ej., desde el URL o un campo oculto en el formulario)
+        evento_id = self.request.GET.get('evento')
+        evento = Evento.objects.get(pk=evento_id)
+
+        # Ahora, creamos una instancia de Participacion para vincular Santa con el Evento
+        Participacion.objects.create(santa=self.object, evento=evento)
+
+        return redirect(self.get_success_url())
+
 
 
 def asignar_destinatarios(santas):
@@ -38,8 +53,8 @@ def asignar_destinatarios(santas):
 
     for santa in santas:
         # Filtra a los santas que cumplen con la restricción de excepción_obsequio (si está presente)
-        if santa.excepcion_obsequio:
-            santas_filtrados = [s for s in santas_copy if s != santa and s != santa.excepcion_obsequio]
+        if santa.excepcion:
+            santas_filtrados = [s for s in santas_copy if s != santa and s != santa.excepcion]
         else:
             santas_filtrados = [s for s in santas_copy if s != santa]
 
@@ -53,6 +68,13 @@ def asignar_destinatarios(santas):
         santa.destinatario = destinatarios[i]
         santa.save()
 
+    for santa in santas:
+        subject = 'Se realizo el Sorteo'
+        message = f"Gracias por participar en el sorteo, te toco { santa.destinatario }"
+        from_email = 'elmonjeamarillo@gmail.com'
+        recipient_list = [santa.usuario.email]  # Asume que los usuarios tienen un campo "email" en su modelo
+        send_mail(subject, message, from_email, recipient_list)
+
     return destinatarios
 
 def crea_santas_from_csv(evento, csv_file):
@@ -60,7 +82,8 @@ def crea_santas_from_csv(evento, csv_file):
     campos_requeridos = ['usuario', 'nombre', 'apellido', 'correo']
     # Lee el archivo CSV y verifica si contiene los campos requeridos
     try:
-        csv_reader = csv.DictReader(csv_file)
+        decoded_file = csv_file.read().decode('utf-8').splitlines()
+        csv_reader = csv.DictReader(decoded_file)
     
         if all(campo in csv_reader.fieldnames for campo in campos_requeridos):
             for row in csv_reader:
@@ -86,13 +109,16 @@ def crea_santas_from_csv(evento, csv_file):
                     send_mail(subject, message, from_email, recipient_list)
 
                 # Crea o recupera al Santa y vincúlalo al evento
-                santa, created = Santa.objects.get_or_create(usuario=user, eventos=evento)
+                santa, created = Santa.objects.get_or_create(usuario=user)
+                participacion, created =Participacion.objects.get_or_create(santa=santa, evento=evento)
+
             return {"respuesta": True, "mensaje": "Se agregaron los participantes"}
         else:
             return {"respuesta": False, "mensaje": "No tiene el formato adecuado"}
     
-    except:
-        return {"respuesta": False, "mensaje": "No se pudo leer el archivo"}
+    except Exception as e:
+        logging.warning(e)
+        return {"respuesta": False, "mensaje": f"No se pudo leer el archivo por: {e}" }
 
 
 @login_required
@@ -103,7 +129,7 @@ def agregar_santas_desde_csv(request, pk):
         csv_file = request.FILES['csv_file']
 
         mensaje_resultado = crea_santas_from_csv(evento, csv_file)
-        print(mensaje_resultado)
+        logging.info(mensaje_resultado)
 
         if mensaje_resultado.get("respuesta"):
             return render(request, 'actualizar_evento.html', {'mensaje': mensaje_resultado.get("mensaje"), "pk": evento.pk})
@@ -132,10 +158,10 @@ class EventoUpdateView(LoginRequiredMixin, UpdateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        evento = self.get_object()
-        eventos_activos = Evento.objects.filter(santa__usuario=self.request.user, activo=True)
-        context['santas'] = evento.santa_set.all()
-        context['eventos_activos'] = eventos_activos
+        evento = self.get_object()        
+        participaciones = Participacion.objects.filter(evento=evento).select_related('santa')
+        santas_para_evento = [participacion.santa for participacion in participaciones]
+        context['santas'] = santas_para_evento
         return context
 
 class EventoDeleteView(LoginRequiredMixin, DeleteView):
@@ -152,7 +178,12 @@ class EventoDetailView(LoginRequiredMixin, DetailView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         evento = self.get_object()
-        context['santas'] = evento.santa_set.all()
+        usuario_actual = self.request.user
+        santa = get_object_or_404(Santa, usuario=usuario_actual)
+        participaciones = Participacion.objects.filter(evento=evento).select_related('santa')
+        santas_para_evento = [participacion.santa for participacion in participaciones]
+        context['santas'] = santas_para_evento
+        context['santa'] = santa
         return context
 
 #### Sorteo
@@ -160,7 +191,8 @@ class EventoDetailView(LoginRequiredMixin, DetailView):
 @login_required
 def realizar_sorteo(request, evento_id):
     evento = get_object_or_404(Evento, pk=evento_id)
-    santas = Santa.objects.filter(eventos=evento)
+    participaciones = Participacion.objects.filter(evento=evento).select_related('santa')
+    santas = [participacion.santa for participacion in participaciones]
 
     # Lógica para realizar el sorteo
     asignar_destinatarios(santas)
@@ -177,8 +209,9 @@ def realizar_nuevo_sorteo(request, evento_id):
     if evento.sorteo_realizado:
         # Si el sorteo ya se ha realizado, mostrar una confirmación o mensaje de advertencia
         messages.warning(request, 'El sorteo ya se ha realizado. ¿Deseas realizar un nuevo sorteo?')
-    else:
-        santas = Santa.objects.filter(eventos=evento)
+    else:        
+        participaciones = Participacion.objects.filter(evento=evento).select_related('santa')
+        santas = [participacion.santa for participacion in participaciones]
 
         # Lógica para realizar un nuevo sorteo
         asignar_destinatarios(santas)
@@ -186,7 +219,7 @@ def realizar_nuevo_sorteo(request, evento_id):
         evento.sorteo_realizado = True
         evento.save()
 
-    return redirect('detalle_evento', evento_id=evento_id)  # Redirige al detalle del evento
+    return redirect('home')  # Redirige al detalle del evento
 
 @login_required
 def cerrar_sesion(request):
@@ -196,7 +229,7 @@ def cerrar_sesion(request):
 
 def inicio(request):
     if request.user.is_authenticated:
-        eventos_activos = Evento.objects.filter(santa__usuario=request.user, activo=True)
+        eventos_activos = Evento.objects.filter(participacion__santa__usuario=request.user, activo=True )
         return render(request, 'auth/home.html', {'eventos_activos': eventos_activos})
     else:
         return render(request, 'auth/home.html')
@@ -204,29 +237,48 @@ def inicio(request):
 @login_required
 def mis_eventos(request):
     usuario_actual = request.user
-    eventos_activos = Evento.objects.filter( activo=True)
+    santa = Santa.objects.filter(usuario=usuario_actual)
+    eventos_activos = Evento.objects.filter( activo=True )
     return render(request, 'mis_eventos.html', {'eventos_activos': eventos_activos})
 
 
 ######################## Santas
 
+@login_required
 def SantaUpdateView(request, id_santa, id_evento):
     santa = get_object_or_404(Santa, pk=id_santa)
     evento = get_object_or_404(Evento, pk=id_evento)
-    formset = OpcionInlineFormSet(instance=santa, queryset=Opcion.objects.filter(evento=evento))
-    
+    opciones = Opcion.objects.filter(santa=santa)
+
+    # Check if the logged-in user is allowed to edit this Santa
+    if request.user != santa.usuario:
+        return render(request, 'santas/detail_santa.html', {'santa': santa, 'opciones': opciones, 'evento': evento})
+
+    # Initialize the formset
+    formset = OpcionInlineFormSet(instance=santa)
+    helper = OpcionFormsetHelper()
+
     if request.method == 'POST':
-        formset = OpcionInlineFormSet(request.POST, request.FILES, instance=santa)
+        formset = OpcionInlineFormSet(request.POST, request.FILES, instance=santa, queryset=Opcion.objects.filter(evento=evento))
         if formset.is_valid():
             formset.save()
+            messages.success(request, "The options have been updated successfully.")
             return redirect('detalle_evento', pk=evento.pk)
-    if request.user == santa.usuario:
-        return render(request, 'santas/detail_santa.html', {'santa': santa, 'opciones': opciones, 'evento': evento})
-    else:
-        return render(request, 'santas/update_santa.html', {'formset': formset, 'santa': santa, 'evento': evento})
+        else:
+            messages.error(request, "Please correct the errors below.")
 
+    # Render the template for GET and POST with errors
+    return render(request, 'santas/update_santa.html', {
+        'formset': formset,
+        'santa': santa,
+        'evento': evento,
+        'helper': helper
+    })
+
+
+@login_required
 def detalle_santa(request, id_santa, id_evento):
     santa = get_object_or_404(Santa, pk=id_santa)
     evento = get_object_or_404(Evento, pk=id_evento)
-    opciones = Opcion.objects.filter(santa=santa, evento=evento)
+    opciones = Opcion.objects.filter(santa=santa)
     return render(request, 'santas/detail_santa.html', {'santa': santa, 'opciones': opciones, 'evento': evento})
