@@ -2,9 +2,9 @@
 
 #Crear Usuario y asignar permisos
 groupadd --system webapps
-useradd --system --gid webapps --home "/var/www/python/santa" santa
+useradd --system --gid webapps --home "/var/www/python/secretsanta" santa
 
-chown -R santa:webapps /var/www/python/santa
+chown -R santa:webapps /var/www/python/secretsanta
 chmod +x gunicorn_santa.bash
 
 #Crear entorno virtual y descargar las librerias

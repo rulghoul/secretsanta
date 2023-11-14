@@ -1,5 +1,5 @@
 upstream santa_server {
-  server unix:/var/www/python/santa/run/gunicorn.sock fail_timeout=0;
+  server unix:/var/www/python/secretsanta/run/gunicorn.sock fail_timeout=0;
 }
 
 server {
@@ -12,11 +12,11 @@ server {
     error_log /var/www/python/santa/logs/nginx-error.log;
 
     location /static {
-        alias   /var/www/python/santa/fiestas/fiestas/static/;
+        alias   /var/www/python/secretsanta/santa/static/;
     }
 
     location /media {
-        alias   /var/www/python/santa/fiestas/fiestas/media/;
+        alias   /var/www/python/secretsanta/santa/media/;
     }
 
     location / {

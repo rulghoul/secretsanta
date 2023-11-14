@@ -1,8 +1,8 @@
 #!/bin/bash
 
 NAME="fiestas"                                  # Name of the application
-DJANGODIR=/var/www/python/santa             # Django project directory
-SOCKFILE=/var/www/python/santa/run/gunicorn.sock  # we will communicte using this unix socket
+DJANGODIR=/var/www/python/secretsanta             # Django project directory
+SOCKFILE=/var/www/python/secretsanta/run/gunicorn.sock  # we will communicte using this unix socket
 USER=santa                                        # the user to run as
 GROUP=webapps                                     # the group to run as
 NUM_WORKERS=4                                     # how many worker processes should Gunicorn spawn
