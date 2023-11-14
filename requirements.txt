@@ -8,3 +8,4 @@ fontawesome-free==5.15.4
 Pillow==10.1.0
 soupsieve==2.5
 sqlparse==0.4.4
+gunicorn==21.2.0
